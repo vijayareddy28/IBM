@@ -13,11 +13,11 @@ const TOKEN_KEY = 'cp_token';
 // Use the deployed backend URL in production; keep /api (proxied) in dev.
 const BASE_URL =
   import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV ? '/api' : 'https://ibm-8o9e.onrender.com/api');
+  (import.meta.env.DEV ? '/api' : 'https://ibm-1-cnxe.onrender.com/api');
 
 const api = axios.create({
   baseURL: BASE_URL,
-  withCredentials: true,
+  withCredentials: false,
   headers: { 'Content-Type': 'application/json' },
 });
 
