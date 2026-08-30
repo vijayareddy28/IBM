@@ -41,12 +41,30 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
+// ── Allowed CORS origins ───────────────────────────────────────────────────────
+// Always includes: the CLIENT_URL env var + Netlify deployment + localhost dev.
+// Add extra origins via CLIENT_URL_EXTRA (comma-separated) if needed.
+const ALLOWED_ORIGINS = [
+  CLIENT_URL,
+  'https://genuine-peony-66b7a6.netlify.app',  // Netlify production frontend
+  'http://localhost:5173',                        // local Vite dev
+  'http://localhost:4173',                        // local Vite preview
+  ...(process.env.CLIENT_URL_EXTRA
+    ? process.env.CLIENT_URL_EXTRA.split(',').map((u) => u.trim())
+    : []),
+].filter(Boolean);
+
 // ── Security middleware ────────────────────────────────────────────────────────
 app.use(helmet());
 
-// CORS — only allow our frontend origin
+// CORS — allow all configured frontend origins
 app.use(cors({
-  origin: CLIENT_URL,
+  origin: (origin, callback) => {
+    // Allow requests with no Origin header (server-to-server, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS: origin ${origin} is not allowed`));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -108,7 +126,7 @@ const startServer = async () => {
 
   app.listen(PORT, () => {
     logger.info(`CarePath AI server running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`);
-    logger.info(`CORS allowing origin: ${CLIENT_URL}`);
+    logger.info(`CORS allowed origins: ${ALLOWED_ORIGINS.join(', ')}`);
   });
 };
 

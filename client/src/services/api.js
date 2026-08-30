@@ -1,14 +1,22 @@
 /**
  * Axios base instance — CarePath AI
- * The Vite proxy in vite.config.js forwards /api → http://localhost:5000
+ *
+ * In development: Vite proxy forwards /api → deployed backend (Render).
+ * In production build: VITE_API_URL sets the absolute base URL directly,
+ *   falling back to the Render backend URL if the env variable is not set.
  */
 
 import axios from 'axios';
 
 const TOKEN_KEY = 'cp_token';
 
+// Use the deployed backend URL in production; keep /api (proxied) in dev.
+const BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? '/api' : 'https://ibm-8o9e.onrender.com/api');
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: BASE_URL,
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 });

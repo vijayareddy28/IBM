@@ -7,14 +7,16 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // Proxy /api requests to Express in development
+      // Proxy /api and /uploads to the deployed Render backend in development
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://ibm-8o9e.onrender.com',
         changeOrigin: true,
+        secure: true,
       },
       '/uploads': {
-        target: 'http://localhost:5000',
+        target: 'https://ibm-8o9e.onrender.com',
         changeOrigin: true,
+        secure: true,
       },
     },
   },
