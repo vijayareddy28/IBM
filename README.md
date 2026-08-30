@@ -1,100 +1,320 @@
-# CarePath AI
+# 🏥 CarePath AI
 
-A role-based healthcare access ecosystem with an AI intelligence layer connecting patients, verified hospitals, healthcare professionals, independent experts, and administrators.
+<div align="center">
+
+### AI-Powered Healthcare Access Ecosystem
+
+Connecting Patients, Verified Hospitals, Healthcare Professionals, Independent Experts, and AI-Powered Healthcare Guidance in One Unified Platform.
+
+![React](https://img.shields.io/badge/Frontend-React-blue)
+![Node.js](https://img.shields.io/badge/Backend-Node.js-green)
+![Express](https://img.shields.io/badge/API-Express-black)
+![MongoDB](https://img.shields.io/badge/Database-MongoDB-brightgreen)
+![JWT](https://img.shields.io/badge/Auth-JWT-orange)
+![AI](https://img.shields.io/badge/AI-Enabled-purple)
+![RAG](https://img.shields.io/badge/RAG-Architecture-red)
+
+</div>
 
 ---
 
-## Overview
+# 🚀 Problem Statement
 
-CarePath AI is a complete full-stack web application built with:
+Healthcare access remains fragmented, making it difficult for patients to:
 
-- **Frontend**: React + Vite + Tailwind CSS
-- **Backend**: Node.js + Express
-- **Database**: MongoDB + Mongoose
-- **Auth**: JWT (access + refresh tokens)
-- **AI Layer**: Provider-independent AI service + RAG architecture
+- Find the right hospitals and specialists
+- Understand medical reports
+- Manage healthcare records
+- Access trusted healthcare information
+- Seek expert opinions
+- Navigate healthcare services efficiently
+
+This often leads to delayed decisions, confusion, and poor healthcare experiences.
 
 ---
 
-## Project Structure
+# 💡 Solution
 
+CarePath AI is an intelligent healthcare ecosystem that combines AI-powered assistance with verified healthcare networks.
+
+```text
+Patients
+    ↓
+AI Healthcare Assistant
+    ↓
+Healthcare Guidance
+    ↓
+Verified Hospitals
+    ↓
+Healthcare Professionals
+    ↓
+Independent Experts
 ```
+
+The platform helps users make informed healthcare decisions while maintaining privacy, trust, and security.
+
+---
+
+# ✨ Key Features
+
+## 👤 Patient Portal
+
+- Personalized Dashboard
+- AI Healthcare Assistant
+- Hospital Discovery
+- Doctor Discovery
+- Appointment Booking
+- Medical Report Upload
+- Health Record Management
+- Healthcare History Tracking
+- Expert Consultation Requests
+
+---
+
+## 🏥 Hospital Portal
+
+- Hospital Profile Management
+- Doctor Management
+- Appointment Handling
+- Patient Request Management
+- Analytics Dashboard
+
+---
+
+## 👨‍⚕️ Professional Portal
+
+- Professional Profile Management
+- Credential Management
+- Availability Scheduling
+- Consultation Handling
+- Hospital Association Requests
+
+---
+
+## 🧠 Expert Portal
+
+- Expert Profile Management
+- Escalated Consultation Handling
+- Advanced Healthcare Support
+- Availability Management
+
+---
+
+## 🛡️ Admin Portal
+
+- User Management
+- Hospital Verification
+- Professional Verification
+- Expert Verification
+- Platform Monitoring
+- Audit Review
+- Analytics Dashboard
+
+---
+
+# 🤖 AI Intelligence Layer
+
+CarePath AI includes a provider-independent AI architecture designed for healthcare guidance and assistance.
+
+## AI Workflow
+
+```text
+User Query
+      ↓
+Intent Detection
+      ↓
+AI Orchestrator
+      ↓
+Specialized Agent
+      ↓
+Knowledge Retrieval
+      ↓
+Response Generation
+      ↓
+Safety Validation
+      ↓
+Final Response
+```
+
+## Specialized Agents
+
+- Healthcare Information Agent
+- Hospital Recommendation Agent
+- Report Understanding Agent
+- Preventive Care Agent
+- Triage Assistance Agent
+
+---
+
+# 📚 Retrieval-Augmented Generation (RAG)
+
+To improve reliability and reduce AI hallucinations, CarePath AI utilizes a Retrieval-Augmented Generation architecture.
+
+```text
+Trusted Healthcare Sources
+           ↓
+Document Processing
+           ↓
+Embeddings
+           ↓
+Vector Database
+           ↓
+Retriever
+           ↓
+LLM
+           ↓
+Safety Validation
+           ↓
+Response
+```
+
+### Benefits
+
+- Context-aware responses
+- Reduced misinformation
+- Improved healthcare relevance
+- Expandable knowledge base
+- Provider-independent architecture
+
+---
+
+# 🔐 Security & Privacy
+
+Healthcare data requires enterprise-grade protection.
+
+CarePath AI implements:
+
+- JWT Authentication
+- Refresh Token Strategy
+- Role-Based Access Control (RBAC)
+- Password Hashing (bcrypt)
+- Input Validation
+- Rate Limiting
+- CORS Protection
+- Audit Logging
+- Consent Management
+- Secure Environment Variables
+
+---
+
+# 👥 User Roles
+
+| Role | Description |
+|--------|------------|
+| USER | Patient seeking healthcare support |
+| HOSPITAL | Hospital administrators |
+| PROFESSIONAL | Doctors and healthcare professionals |
+| EXPERT | Independent healthcare experts |
+| ADMIN | Platform administrators |
+
+Server-side RBAC ensures secure access control across all protected APIs.
+
+---
+
+# 🏗️ Technology Stack
+
+## Frontend
+
+- React.js
+- Vite
+- Tailwind CSS
+- React Router
+- Axios
+
+## Backend
+
+- Node.js
+- Express.js
+
+## Database
+
+- MongoDB
+- Mongoose
+
+## Authentication
+
+- JWT Authentication
+- Refresh Tokens
+
+## AI Layer
+
+- Provider-Independent AI Service
+- Retrieval-Augmented Generation (RAG)
+
+---
+
+# 📂 Project Structure
+
+```text
 CarePath-AI/
-├── client/                   # Vite + React frontend
+│
+├── client/
 │   ├── src/
-│   │   ├── components/       # Reusable UI components
-│   │   │   ├── common/       # Button, Badge, EmptyState, Skeleton…
-│   │   │   └── layout/       # Navbar, Footer, DashboardLayout…
-│   │   ├── context/          # AuthContext
-│   │   ├── hooks/            # useAuth, useToast
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── hooks/
 │   │   ├── pages/
-│   │   │   ├── public/       # Landing, About, HowItWorks, Contact
-│   │   │   ├── auth/         # Login, Register
-│   │   │   ├── user/         # Patient dashboard & flows
-│   │   │   ├── hospital/     # Hospital dashboard & management
-│   │   │   ├── professional/ # Professional dashboard
-│   │   │   ├── expert/       # Expert dashboard
-│   │   │   └── admin/        # Admin panel
-│   │   ├── routes/           # AppRouter, ProtectedRoute, RoleRoute
-│   │   ├── services/         # api.js (Axios base instance)
-│   │   └── utils/            # helpers, constants
-│   └── package.json
+│   │   ├── routes/
+│   │   ├── services/
+│   │   └── utils/
 │
-├── server/                   # Express backend
-│   ├── config/               # db.js (Mongoose connection)
-│   ├── controllers/          # Request handlers (added per stage)
-│   ├── middleware/           # auth, rbac, validate, upload, errorHandler
-│   ├── models/               # Mongoose models (added in Stage 3)
-│   ├── routes/               # Express route files
-│   ├── services/             # Business logic (added per stage)
-│   ├── tests/                # Jest + Supertest suites (Stage 20)
-│   ├── seed/                 # Database seeder (Stage 21)
-│   ├── utils/                # logger, responseHelper, constants
-│   ├── .env.example
-│   └── server.js
+├── server/
+│   ├── config/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── services/
+│   ├── tests/
+│   ├── seed/
+│   └── utils/
 │
-├── .gitignore
-└── README.md
+├── README.md
+├── IBM_BOB_USAGE.md
+└── .env.example
 ```
 
 ---
 
-## Environment Variables
+# ⚙️ Environment Variables
 
-**Never commit the real `.env` file.**
+Create a `.env` file inside the server directory.
 
-Copy `server/.env.example` to `server/.env` and fill in your values:
-
-```
+```env
 PORT=5000
 NODE_ENV=development
-MONGODB_URI=           ← your MongoDB Atlas or local connection string
-JWT_SECRET=            ← long random string
-JWT_REFRESH_SECRET=    ← separate long random string
+
+MONGODB_URI=
+
+JWT_SECRET=
+JWT_REFRESH_SECRET=
+
 CLIENT_URL=http://localhost:5173
-AI_API_KEY=            ← optional — app runs in demo mode without it
+
+AI_API_KEY=
 MAPS_API_KEY=
 OCR_API_KEY=
 VOICE_API_KEY=
 ```
 
+> Never commit real credentials or secrets to GitHub.
+
 ---
 
-## Installation
+# 🚀 Installation
 
 ### Prerequisites
 
 - Node.js v18+
-- MongoDB (Atlas or local)
+- MongoDB Atlas or Local MongoDB
 
-### Install all dependencies
+### Install Dependencies
 
 ```bash
-# From project root
 npm run install:all
 ```
 
-Or separately:
+Or manually:
 
 ```bash
 cd server && npm install
@@ -103,40 +323,41 @@ cd ../client && npm install
 
 ---
 
-## Running the Application
+# ▶️ Running the Application
 
-### Start the backend (port 5000)
+### Start Backend
 
 ```bash
 npm run server
-# or: cd server && npm run dev
 ```
 
-### Start the frontend (port 5173)
+or
+
+```bash
+cd server && npm run dev
+```
+
+### Start Frontend
 
 ```bash
 npm run dev
-# or: cd client && npm run dev
 ```
 
-### Build the frontend
+or
 
 ```bash
-npm run build
-# or: cd client && npm run build
+cd client && npm run dev
 ```
 
 ---
 
-## API Health Check
+# 🌐 API Health Check
 
-Once the server is running:
-
-```
-GET http://localhost:5000/api/health
+```http
+GET /api/health
 ```
 
-Should return:
+Response:
 
 ```json
 {
@@ -148,75 +369,67 @@ Should return:
 
 ---
 
-## User Roles
+# 📈 Development Roadmap
 
-| Role | Description |
-|------|-------------|
-| `USER` | Patient — searches hospitals, books appointments, manages health records |
-| `HOSPITAL` | Hospital administrator — manages institution profile and doctors |
-| `PROFESSIONAL` | Doctor/specialist — manages credentials and consultations |
-| `EXPERT` | Independent expert — accepts escalated consultations |
-| `ADMIN` | Platform administrator — verifies entities and reviews platform health |
-
-RBAC is enforced **server-side** on every protected API route.
-
----
-
-## Implementation Stages
-
-This project is built stage by stage:
-
-| Stage | Focus |
-|-------|-------|
-| 2 ✅ | Project scaffold (this stage) |
-| 3 | MongoDB + Mongoose models |
-| 4 | Authentication + RBAC |
-| 5 | Public pages (landing, about, contact) |
-| 6 | User dashboard |
-| 7 | Hospital management |
-| 8 | Professional management |
-| 9 | Expert management |
-| 10 | Appointments & requests |
-| 11 | Health reports & history |
-| 12 | AI assistant |
-| 13 | RAG architecture |
-| 14 | Emergency & expert escalation |
-| 15 | Notifications |
-| 16 | Admin dashboard |
-| 17 | Analytics |
-| 18 | Security, audit logs & consent |
-| 19 | Responsive UI polish |
-| 20 | Test suite |
-| 21 | Seed data + final integration |
+| Stage | Status |
+|---------|---------|
+| Project Foundation | ✅ |
+| MongoDB Models | ✅ |
+| Authentication & RBAC | ✅ |
+| User Dashboard | ✅ |
+| Hospital Management | ✅ |
+| Professional Management | ✅ |
+| Expert Management | ✅ |
+| Appointments & Requests | 🚧 |
+| Health Records & Reports | 🚧 |
+| AI Assistant | 🚧 |
+| RAG Integration | 🚧 |
+| Notifications | 🚧 |
+| Analytics | 🚧 |
+| Security & Audit Logs | 🚧 |
+| Testing & QA | 🚧 |
 
 ---
 
-## Security
+# 🏆 IBM Hackathon
 
-- Passwords hashed with bcryptjs
-- JWT access + refresh token pattern
-- Helmet HTTP security headers
-- CORS restricted to `CLIENT_URL`
-- Global rate limiting (200 req/15 min)
-- Per-route strict rate limiting on auth endpoints
-- Input validation via express-validator
-- Server-side RBAC — role never trusted from client
-- Audit logging for all sensitive operations
+This project was developed with assistance from **IBM Bob** as an AI-powered development assistant.
 
----
+IBM Bob supported:
 
-## AI Architecture (Stage 12+)
+- Architecture Planning
+- Frontend Development
+- Backend Development
+- Database Design
+- Security Review
+- AI Workflow Design
+- Debugging
+- Documentation
 
-```
-User Input → Input Processing → Intent Detection → AI Orchestrator
-  → Specialized Agent → RAG Retriever → LLM
-  → Safety Validation → Response
-```
+For detailed information, see:
 
-If no `AI_API_KEY` is set, the application continues running in clearly-labelled **demo mode**. AI responses never present as medical diagnoses.
+📄 **IBM_BOB_USAGE.md**
 
 ---
 
-## License
+# 🌟 Vision
 
-MIT — for educational/portfolio purposes.
+To build an intelligent healthcare ecosystem that helps people navigate healthcare services efficiently while maintaining trust, privacy, accessibility, and safety.
+
+By combining AI-powered assistance with verified healthcare networks, CarePath AI aims to make healthcare guidance more accessible, reliable, and user-centric.
+
+---
+
+# 📜 License
+
+MIT License
+
+---
+
+<div align="center">
+
+### Built for Better Healthcare Accessibility ❤️
+
+**CarePath AI • IBM Hackathon Project**
+
+</div>
