@@ -284,17 +284,8 @@ Create a `.env` file inside the server directory.
 PORT=5000
 NODE_ENV=development
 
-MONGODB_URI=
-
-JWT_SECRET=
-JWT_REFRESH_SECRET=
-
 CLIENT_URL=http://localhost:5173
 
-AI_API_KEY=
-MAPS_API_KEY=
-OCR_API_KEY=
-VOICE_API_KEY=
 ```
 
 > Never commit real credentials or secrets to GitHub.
@@ -380,14 +371,13 @@ Response:
 | Hospital Management | ✅ |
 | Professional Management | ✅ |
 | Expert Management | ✅ |
-| Appointments & Requests | 🚧 |
-| Health Records & Reports | 🚧 |
-| AI Assistant | 🚧 |
-| RAG Integration | 🚧 |
-| Notifications | 🚧 |
-| Analytics | 🚧 |
-| Security & Audit Logs | 🚧 |
-| Testing & QA | 🚧 |
+| Appointments & Requests | ✅ |
+| Health Records & Reports | ✅ |
+| AI Assistant | ✅ |
+| Notifications | ✅ |
+| Analytics | ✅ |
+| Security & Audit Logs | ✅ |
+| Testing & QA | ✅ |
 
 ---
 
