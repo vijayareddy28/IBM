@@ -9,12 +9,12 @@ export default defineConfig({
     proxy: {
       // Proxy /api and /uploads to the deployed Render backend in development
       '/api': {
-        target: 'https://ibm-1-cnxe.onrender.com',
+        target: 'https://invicts.onrender.com',
         changeOrigin: true,
         secure: true,
       },
       '/uploads': {
-        target: 'https://ibm-1-cnxe.onrender.com',
+        target: 'https://invicts.onrender.com',
         changeOrigin: true,
         secure: true,
       },
