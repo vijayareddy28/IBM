@@ -13,7 +13,7 @@ const TOKEN_KEY = 'cp_token';
 // Use the deployed backend URL in production; keep /api (proxied) in dev.
 const BASE_URL =
   import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV ? '/api' : 'https://invicts.onrender.com/api');
+  (import.meta.env.DEV ? '/api' : 'https://ibm-backend-qwiw.onrender.com/api');
 
 const api = axios.create({
   baseURL: BASE_URL,

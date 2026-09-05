@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 //   - If VITE_BACKEND_URL is set, use it.
 //   - Otherwise use the deployed Render backend (always available, no local server needed).
 //   - To use local server: set VITE_BACKEND_URL=http://localhost:5000 before running dev.
-const BACKEND = process.env.VITE_BACKEND_URL || 'https://invicts.onrender.com';
+const BACKEND = process.env.VITE_BACKEND_URL || 'https://ibm-backend-qwiw.onrender.com';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
