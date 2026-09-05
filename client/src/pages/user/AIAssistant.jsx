@@ -305,10 +305,20 @@ const AIAssistant = () => {
         </div>
       </div>
 
-      {/* Disclaimer — UNCHANGED */}
-      <div className="py-3 px-4 bg-amber-50 border border-amber-100 rounded-xl my-3 text-xs text-amber-800 flex gap-2">
-        <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-        <span>{t('ai.disclaimer')}</span>
+      {/* Medical Disclaimer — visible, clear, non-obtrusive */}
+      <div className="py-3 px-4 bg-amber-50 border border-amber-200 rounded-xl my-3 text-xs text-amber-900">
+        <div className="flex items-start gap-2">
+          <Info className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
+          <div>
+            <p className="font-semibold mb-0.5">⚕️ Medical Disclaimer</p>
+            <p className="leading-relaxed">
+              {t('ai.disclaimer')}{' '}
+              <strong>CarePath AI is not a doctor</strong> and does not provide medical diagnosis, prescriptions, or treatment plans.
+              It provides general health information only. For any medical concern, always consult a qualified healthcare professional.
+              In an emergency, call <strong>112</strong> immediately.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Voice status toast — appears above message list when STT/TTS is active */}

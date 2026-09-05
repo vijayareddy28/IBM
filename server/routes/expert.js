@@ -66,6 +66,10 @@ const profileValidation = [
 router.get('/profile', expertController.getProfile);
 router.put('/profile', profileValidation, expertController.upsertProfile);
 
+// ── Consultation routes ────────────────────────────────────────────────────────
+router.get('/consultations',                expertController.getConsultations);
+router.put('/consultations/:id/status',     expertController.updateConsultationStatus);
+
 // ── Request routes ────────────────────────────────────────────────────────────
 router.get('/requests',              expertController.getMyRequests);
 router.post('/requests/to-hospital', expertController.sendRequestToHospital);

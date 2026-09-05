@@ -2,19 +2,24 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
+// Proxy target:
+//   - If VITE_BACKEND_URL is set, use it.
+//   - Otherwise use the deployed Render backend (always available, no local server needed).
+//   - To use local server: set VITE_BACKEND_URL=http://localhost:5000 before running dev.
+const BACKEND = process.env.VITE_BACKEND_URL || 'https://invicts.onrender.com';
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     port: 5173,
     proxy: {
-      // Proxy /api and /uploads to the deployed Render backend in development
       '/api': {
-        target: 'https://invicts.onrender.com',
+        target: BACKEND,
         changeOrigin: true,
         secure: true,
       },
       '/uploads': {
-        target: 'https://invicts.onrender.com',
+        target: BACKEND,
         changeOrigin: true,
         secure: true,
       },

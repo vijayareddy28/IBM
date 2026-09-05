@@ -1,14 +1,14 @@
 /**
  * ExpertHelp — CarePath AI
- * Find and request help from verified health experts.
+ * Find and request help from verified individual health experts (EXPERT role).
  */
 
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Users, Search, Star, Clock, Loader2, AlertCircle, ChevronRight,
+  Users, Search, Clock, Loader2, AlertCircle, ChevronRight,
 } from 'lucide-react';
-import { searchProfessionals } from '../../services/userService';
+import api from '../../services/api';
 
 const ExpertCard = ({ expert }) => (
   <div className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-sm transition-shadow">
@@ -52,11 +52,12 @@ const ExpertHelp = () => {
     setLoading(true);
     setError(null);
     try {
-      const params = { limit: 30 };
+      const params = { limit: 30, verified: true };
       if (query) params.q = query;
-      const res = await searchProfessionals(params);
-      setExperts(res.data?.professionals || []);
-      setTotal(res.data?.total || 0);
+      // Fetch from expert search endpoint — returns only EXPERT-role profiles
+      const res = await api.get('/search/experts', { params });
+      setExperts(res.data?.data?.experts || []);
+      setTotal(res.data?.data?.total || 0);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load experts');
     } finally {

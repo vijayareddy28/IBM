@@ -11,7 +11,7 @@
 
 'use strict';
 
-const { Hospital, Professional } = require('../models');
+const { Hospital, Professional, Expert } = require('../models');
 const { success } = require('../utils/responseHelper');
 const { AppError } = require('../middleware/errorHandler');
 
@@ -38,7 +38,7 @@ const searchHospitals = async (req, res, next) => {
     if (emergency === 'true') filter.emergencyAvailable = true;
 
     const hospitals = await Hospital.find(filter)
-      .select('name description city state country phone email specialties services facilities emergencyAvailable verificationStatus')
+      .select('name description city state country phone email specialties services facilities emergencyAvailable verificationStatus location')
       .sort({ name: 1 })
       .skip((page - 1) * limit)
       .limit(Number(limit));
@@ -122,4 +122,49 @@ const getProfessional = async (req, res, next) => {
   }
 };
 
-module.exports = { searchHospitals, getHospital, searchProfessionals, getProfessional };
+// ── Search individual experts ─────────────────────────────────────────────────
+const searchExperts = async (req, res, next) => {
+  try {
+    const { q, specialization, page = 1, limit = 20 } = req.query;
+
+    const filter = { verificationStatus: 'VERIFIED', isActive: true };
+
+    if (q) {
+      filter.$or = [
+        { name: { $regex: q, $options: 'i' } },
+        { specialization: { $regex: q, $options: 'i' } },
+        { bio: { $regex: q, $options: 'i' } },
+      ];
+    }
+    if (specialization) filter.specialization = { $regex: specialization, $options: 'i' };
+
+    const experts = await Expert.find(filter)
+      .select('name specialization qualification experience bio consultationModes profileImage')
+      .sort({ name: 1 })
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    const total = await Expert.countDocuments(filter);
+    return success(res, { experts, total, page: Number(page) }, 'Experts retrieved');
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ── Get single expert ─────────────────────────────────────────────────────────
+const getExpert = async (req, res, next) => {
+  try {
+    const expert = await Expert.findOne({
+      _id: req.params.id,
+      verificationStatus: 'VERIFIED',
+      isActive: true,
+    }).select('-userId');
+
+    if (!expert) return next(new AppError('Expert not found', 404));
+    return success(res, { expert }, 'Expert retrieved');
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { searchHospitals, getHospital, searchProfessionals, getProfessional, searchExperts, getExpert };

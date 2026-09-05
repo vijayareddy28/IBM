@@ -37,6 +37,7 @@ const notificationController = require('../controllers/notificationController');
 const hospitalExtController = require('../controllers/hospitalExtController');
 const { verifyToken }       = require('../middleware/auth');
 const { requireRole }       = require('../middleware/rbac');
+const { credentialUpload }  = require('../middleware/upload');
 const { ROLES }             = require('../utils/constants');
 
 const router = express.Router();
@@ -138,6 +139,7 @@ router.get('/profile',  hospitalController.getProfile);
 router.put('/profile',  profileValidation, hospitalController.upsertProfile);
 router.get('/doctors',  hospitalController.listDoctors);
 router.post('/doctors/invite', inviteDoctorValidation, hospitalController.inviteDoctor);
+router.post('/doctors/:id/certificate', credentialUpload.single('certificate'), hospitalController.uploadDoctorCertificate);
 
 // ── Appointment routes ─────────────────────────────────────────────────────────
 router.get('/appointments',                  appointmentController.listHospitalAppointments);

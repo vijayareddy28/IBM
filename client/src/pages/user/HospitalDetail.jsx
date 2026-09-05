@@ -1,15 +1,189 @@
 /**
  * HospitalDetail — CarePath AI
- * View a single hospital's full profile.
+ * View a single hospital's full profile, including Google Maps integration.
+ * Uses real lat/lng from MongoDB when available, falls back to static map link.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   Building2, MapPin, Phone, Mail, Shield, Stethoscope,
-  ArrowLeft, Loader2, AlertCircle, CheckCircle, Calendar,
+  ArrowLeft, Loader2, AlertCircle, CheckCircle, Calendar, ExternalLink,
+  Map,
 } from 'lucide-react';
 import { fetchHospitalById } from '../../services/userService';
+
+// ── Google Maps component ──────────────────────────────────────────────────────
+const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+
+const HospitalMap = ({ hospital }) => {
+  const mapRef  = useRef(null);
+  const [status, setStatus] = useState('idle'); // idle | loading | loaded | error | no-coords
+
+  const lat = hospital?.location?.latitude;
+  const lng = hospital?.location?.longitude;
+  const hasCoords = typeof lat === 'number' && typeof lng === 'number';
+
+  useEffect(() => {
+    if (!hasCoords) { setStatus('no-coords'); return; }
+    if (!GOOGLE_MAPS_API_KEY) { setStatus('no-key'); return; }
+    if (!mapRef.current) return;
+
+    // Prevent double-loading the script
+    const SCRIPT_ID = 'google-maps-script';
+    const initMap = () => {
+      try {
+        setStatus('loading');
+        // eslint-disable-next-line no-undef
+        const map = new window.google.maps.Map(mapRef.current, {
+          center:    { lat, lng },
+          zoom:      15,
+          mapTypeId: 'roadmap',
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: true,
+        });
+        // eslint-disable-next-line no-undef
+        new window.google.maps.Marker({
+          position: { lat, lng },
+          map,
+          title: hospital.name,
+          // eslint-disable-next-line no-undef
+          animation: window.google.maps.Animation.DROP,
+        });
+        setStatus('loaded');
+      } catch (err) {
+        console.error('[HospitalMap] Error initializing map:', err);
+        setStatus('error');
+      }
+    };
+
+    if (window.google?.maps) {
+      initMap();
+      return;
+    }
+
+    // Attach a unique callback name to avoid collision
+    const callbackName = `initMap_${Date.now()}`;
+    window[callbackName] = () => {
+      initMap();
+      delete window[callbackName];
+    };
+
+    if (!document.getElementById(SCRIPT_ID)) {
+      const script = document.createElement('script');
+      script.id   = SCRIPT_ID;
+      script.src  = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=${callbackName}&loading=async`;
+      script.async = true;
+      script.defer = true;
+      script.onerror = () => { setStatus('error'); delete window[callbackName]; };
+      document.head.appendChild(script);
+    } else {
+      // Script already in DOM, wait for it
+      const wait = setInterval(() => {
+        if (window.google?.maps) { clearInterval(wait); initMap(); }
+      }, 100);
+      return () => clearInterval(wait);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lat, lng]);
+
+  // Google Maps URL for the location (works without API key as fallback link)
+  const mapsUrl = hasCoords
+    ? `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+        [hospital.name, hospital.city, hospital.country].filter(Boolean).join(', ')
+      )}`;
+
+  if (status === 'no-coords') {
+    return (
+      <div className="bg-white border border-gray-200 rounded-xl p-5">
+        <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+          <Map className="w-4 h-4 text-blue-600" /> Location
+        </h2>
+        <div className="flex flex-col items-center justify-center py-8 bg-gray-50 rounded-xl border border-gray-100 text-center">
+          <MapPin className="w-8 h-8 text-gray-300 mb-2" />
+          <p className="text-xs text-gray-500 mb-3">Map coordinates not available for this hospital.</p>
+          <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 border border-blue-200 rounded-lg px-3 py-1.5 transition-colors">
+            <ExternalLink className="w-3.5 h-3.5" /> Search on Google Maps
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === 'no-key') {
+    // No API key — render a static embedded map via Google Maps iframe (no API key needed for basic embed)
+    const query = encodeURIComponent([hospital.name, hospital.city, hospital.country].filter(Boolean).join(', '));
+    return (
+      <div className="bg-white border border-gray-200 rounded-xl p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+            <Map className="w-4 h-4 text-blue-600" /> Location
+          </h2>
+          <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700">
+            <ExternalLink className="w-3 h-3" /> Open in Maps
+          </a>
+        </div>
+        <div className="rounded-xl overflow-hidden border border-gray-100">
+          <iframe
+            title="Hospital Location"
+            width="100%"
+            height="300"
+            style={{ border: 0 }}
+            loading="lazy"
+            allowFullScreen
+            src={`https://www.google.com/maps?q=${query}&output=embed`}
+          />
+        </div>
+        <p className="text-xs text-gray-400 mt-2">
+          Map shown for "{hospital.city || hospital.name}". Add coordinates in the hospital profile for a precise pin.
+        </p>
+      </div>
+    );
+  }
+
+  if (status === 'error') {
+    return (
+      <div className="bg-white border border-gray-200 rounded-xl p-5">
+        <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+          <Map className="w-4 h-4 text-blue-600" /> Location
+        </h2>
+        <div className="flex flex-col items-center justify-center py-6 bg-red-50 rounded-xl border border-red-100 text-center">
+          <AlertCircle className="w-6 h-6 text-red-400 mb-2" />
+          <p className="text-xs text-red-600 mb-2">Failed to load map.</p>
+          <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 border border-blue-200 rounded-lg px-3 py-1.5 transition-colors">
+            <ExternalLink className="w-3.5 h-3.5" /> Open in Google Maps
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-5">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+          <Map className="w-4 h-4 text-blue-600" /> Location
+        </h2>
+        <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700">
+          <ExternalLink className="w-3 h-3" /> Open in Maps
+        </a>
+      </div>
+      <div ref={mapRef} className="w-full h-72 rounded-xl overflow-hidden border border-gray-100 bg-gray-100">
+        {status === 'loading' && (
+          <div className="flex items-center justify-center h-full">
+            <Loader2 className="w-5 h-5 text-blue-400 animate-spin" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const Tag = ({ label, color = 'blue' }) => {
   const colors = {
@@ -129,6 +303,9 @@ const HospitalDetail = () => {
           </div>
         </div>
       )}
+
+      {/* Google Maps */}
+      <HospitalMap hospital={hospital} />
 
       {/* CTA */}
       <Link to="/user/appointments"

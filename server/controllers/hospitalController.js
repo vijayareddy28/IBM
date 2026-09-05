@@ -16,6 +16,8 @@
 'use strict';
 
 const { validationResult } = require('express-validator');
+const path = require('path');
+const fs   = require('fs');
 const { Hospital, Professional, User, Request } = require('../models');
 const { success, fail } = require('../utils/responseHelper');
 const { AppError }      = require('../middleware/errorHandler');
@@ -293,4 +295,36 @@ const inviteDoctor = async (req, res, next) => {
   }
 };
 
-module.exports = { submitRegistrationRequest, getProfile, upsertProfile, listDoctors, inviteDoctor };
+// ── POST /api/hospital/doctors/:id/certificate ───────────────────────────────
+// Hospital uploads/updates a certificate for one of its associated doctors.
+const uploadDoctorCertificate = async (req, res, next) => {
+  try {
+    if (!req.file) return fail(res, 'No certificate file uploaded', 400);
+
+    const hospital = await Hospital.findOne({ createdBy: req.user.sub });
+    if (!hospital) return fail(res, 'Hospital profile not found', 400);
+
+    // Verify the doctor is associated with this hospital
+    const doctor = await Professional.findOne({
+      _id: req.params.id,
+      'hospitalAssociations.hospitalId': hospital._id,
+    });
+    if (!doctor) return next(new AppError('Doctor not associated with your hospital', 404));
+
+    const { title = 'Certificate', year } = req.body;
+    const documentUrl = `/uploads/credentials/${req.file.filename}`;
+
+    doctor.credentials.push({
+      title: title.trim(),
+      year:  year ? Number(year) : undefined,
+      documentUrl,
+    });
+    await doctor.save();
+
+    return success(res, { credential: doctor.credentials.at(-1) }, 'Certificate uploaded', 201);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { submitRegistrationRequest, getProfile, upsertProfile, listDoctors, inviteDoctor, uploadDoctorCertificate };

@@ -30,13 +30,15 @@
 const express  = require('express');
 const { body } = require('express-validator');
 
-const userController        = require('../controllers/userController');
-const appointmentController = require('../controllers/appointmentController');
+const userController         = require('../controllers/userController');
+const appointmentController  = require('../controllers/appointmentController');
 const notificationController = require('../controllers/notificationController');
 const healthRecordController = require('../controllers/healthRecordController');
+const healthReportController = require('../controllers/healthReportController');
 const aiController           = require('../controllers/aiController');
-const { verifyToken }       = require('../middleware/auth');
-const { requireRole }       = require('../middleware/rbac');
+const { verifyToken }        = require('../middleware/auth');
+const { requireRole }        = require('../middleware/rbac');
+const { reportUpload }       = require('../middleware/upload');
 const { ROLES, APPOINTMENT_STATUS, CONSULTATION_MODES, HEALTH_RECORD_TYPES } = require('../utils/constants');
 
 const router = express.Router();
@@ -167,5 +169,11 @@ router.post('/history',      healthRecordValidation, healthRecordController.crea
 router.get('/history/:id',   healthRecordController.getRecord);
 router.put('/history/:id',   healthRecordController.updateRecord);
 router.delete('/history/:id', healthRecordController.deleteRecord);
+
+// ── Health report routes (file upload + AI analysis) ──────────────────────────
+router.post('/reports',       reportUpload.single('file'), healthReportController.uploadReport);
+router.get('/reports',        healthReportController.listReports);
+router.get('/reports/:id',    healthReportController.getReport);
+router.delete('/reports/:id', healthReportController.deleteReport);
 
 module.exports = router;

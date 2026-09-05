@@ -20,5 +20,7 @@ router.get('/hospitals',           searchController.searchHospitals);
 router.get('/hospitals/:id',       searchController.getHospital);
 router.get('/professionals',       searchController.searchProfessionals);
 router.get('/professionals/:id',   searchController.getProfessional);
+router.get('/experts',             searchController.searchExperts);
+router.get('/experts/:id',         searchController.getExpert);
 
 module.exports = router;

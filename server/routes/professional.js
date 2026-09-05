@@ -12,6 +12,7 @@ const { body } = require('express-validator');
 const c = require('../controllers/professionalController');
 const { verifyToken }        = require('../middleware/auth');
 const { requireRole }        = require('../middleware/rbac');
+const { credentialUpload }   = require('../middleware/upload');
 const { ROLES, CONSULTATION_MODES } = require('../utils/constants');
 
 const router = express.Router();
@@ -53,7 +54,8 @@ router.put('/notifications/read-all', c.markAllNotificationsRead);
 router.put('/notifications/:id/read', c.markNotificationRead);
 
 // ── Appointments ───────────────────────────────────────────────────────────────
-router.get('/appointments', c.getAppointments);
+router.get('/appointments',                    c.getAppointments);
+router.put('/appointments/:id/status',         c.updateAppointmentStatus);
 
 // ── Availability ───────────────────────────────────────────────────────────────
 router.put('/availability', c.updateAvailability);
@@ -61,5 +63,9 @@ router.put('/availability', c.updateAvailability);
 // ── Requests ───────────────────────────────────────────────────────────────────
 router.get('/requests',  c.getRequests);
 router.post('/requests', c.sendRequest);
+
+// ── Credentials (document upload) ─────────────────────────────────────────────
+router.post('/credentials',          credentialUpload.single('document'), c.uploadCredential);
+router.delete('/credentials/:credId', c.deleteCredential);
 
 module.exports = router;

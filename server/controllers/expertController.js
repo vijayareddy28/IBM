@@ -7,6 +7,8 @@
  * Routes:
  *   GET  /api/expert/profile                   — fetch own expert profile
  *   PUT  /api/expert/profile                   — create or update expert profile
+ *   GET  /api/expert/consultations             — list own consultations (appointments)
+ *   PUT  /api/expert/consultations/:id/status  — update consultation status
  *   POST /api/expert/requests/to-hospital      — expert sends request to a hospital (about a doctor)
  *   POST /api/expert/requests/to-admin         — expert sends request/escalation directly to admin (app founder)
  *   GET  /api/expert/requests                  — list own submitted requests
@@ -124,6 +126,65 @@ const sendRequestToAdmin = async (req, res, next) => {
   }
 };
 
+// ── GET /api/expert/consultations ────────────────────────────────────────────
+const getConsultations = async (req, res, next) => {
+  try {
+    const { Appointment } = require('../models');
+    const { status } = req.query;
+
+    const expertProfile = await Expert.findOne({ userId: req.user.sub });
+    if (!expertProfile) {
+      return success(res, { consultations: [], total: 0 }, 'No expert profile found');
+    }
+
+    const filter = { expertId: expertProfile._id };
+    if (status) filter.status = status.toUpperCase();
+
+    const appointments = await Appointment.find(filter)
+      .populate('userId', 'name email phone')
+      .populate('hospitalId', 'name city')
+      .sort({ createdAt: -1 })
+      .limit(100);
+
+    return success(res, { consultations: appointments, total: appointments.length }, 'Consultations retrieved');
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ── PUT /api/expert/consultations/:id/status ─────────────────────────────────
+const updateConsultationStatus = async (req, res, next) => {
+  try {
+    const { Appointment } = require('../models');
+    const { status, note } = req.body;
+
+    if (!status) return fail(res, 'status is required', 400);
+
+    const expertProfile = await Expert.findOne({ userId: req.user.sub });
+    if (!expertProfile) return next(new AppError('Expert profile not found', 404));
+
+    const appointment = await Appointment.findOne({
+      _id: req.params.id,
+      expertId: expertProfile._id,
+    });
+    if (!appointment) return next(new AppError('Consultation not found', 404));
+
+    const prevStatus = appointment.status;
+    appointment.status = status.toUpperCase();
+    appointment.statusHistory.push({
+      status: status.toUpperCase(),
+      changedBy: req.user.sub,
+      changedAt: new Date(),
+      note: note || undefined,
+    });
+    await appointment.save();
+
+    return success(res, { consultation: appointment }, 'Consultation status updated');
+  } catch (err) {
+    next(err);
+  }
+};
+
 // ── GET /api/expert/requests ──────────────────────────────────────────────────
 const getMyRequests = async (req, res, next) => {
   try {
@@ -142,4 +203,4 @@ const getMyRequests = async (req, res, next) => {
   }
 };
 
-module.exports = { getProfile, upsertProfile, sendRequestToHospital, sendRequestToAdmin, getMyRequests };
+module.exports = { getProfile, upsertProfile, getConsultations, updateConsultationStatus, sendRequestToHospital, sendRequestToAdmin, getMyRequests };

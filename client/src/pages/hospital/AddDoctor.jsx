@@ -7,10 +7,10 @@
  * Route: /hospital/doctors/add
  */
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, UserPlus, Loader2, CheckCircle, AlertCircle, Info,
+  ArrowLeft, UserPlus, Loader2, CheckCircle, AlertCircle, Info, Upload, FileText,
 } from 'lucide-react';
 import api from '../../services/api';
 
@@ -51,6 +51,15 @@ const AddDoctor = () => {
   const [saving, setSaving]   = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError]     = useState(null);
+  const [createdDoctorId, setCreatedDoctorId] = useState(null);
+
+  // Certificate upload
+  const [certFile, setCertFile]             = useState(null);
+  const [certTitle, setCertTitle]           = useState('');
+  const [certUploading, setCertUploading]   = useState(false);
+  const [certSuccess, setCertSuccess]       = useState(null);
+  const [certError, setCertError]           = useState(null);
+  const certInputRef = useRef(null);
 
   const [form, setForm] = useState({
     name: '',
@@ -97,11 +106,33 @@ const AddDoctor = () => {
       const res = await api.post('/hospital/doctors/invite', payload);
       // Server may return login credentials if new account was created
       setCreatedCreds(res.data?.data?.loginCredentials || null);
+      const doctorId = res.data?.data?.doctor?._id;
+      if (doctorId) setCreatedDoctorId(doctorId);
       setSuccess(true);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to add doctor. Please try again.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleCertUpload = async () => {
+    if (!certFile || !createdDoctorId) return;
+    setCertUploading(true); setCertError(null); setCertSuccess(null);
+    const formData = new FormData();
+    formData.append('certificate', certFile);
+    formData.append('title', certTitle.trim() || 'Doctor Certificate');
+    try {
+      await api.post(`/hospital/doctors/${createdDoctorId}/certificate`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setCertSuccess('Certificate uploaded successfully!');
+      setCertFile(null);
+      if (certInputRef.current) certInputRef.current.value = '';
+    } catch (err) {
+      setCertError(err.response?.data?.message || 'Certificate upload failed');
+    } finally {
+      setCertUploading(false);
     }
   };
 
@@ -138,8 +169,44 @@ const AddDoctor = () => {
           <p className="text-xs text-gray-500 mb-4">
             The doctor can log in at <strong>CarePath AI → Healthcare Professional</strong> using the credentials above.
           </p>
+
+          {/* Certificate upload */}
+          {createdDoctorId && (
+            <div className="bg-white border border-gray-200 rounded-xl p-4 text-left mb-4 space-y-3">
+              <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                <Upload className="w-4 h-4 text-emerald-600" /> Upload Doctor Certificate (Optional)
+              </h3>
+              {certSuccess && (
+                <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1.5">{certSuccess}</p>
+              )}
+              {certError && (
+                <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded px-2 py-1.5">{certError}</p>
+              )}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Certificate Label</label>
+                <input value={certTitle} onChange={(e) => setCertTitle(e.target.value)}
+                  placeholder="e.g. MBBS Certificate, Medical License"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+              </div>
+              <div>
+                <input ref={certInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={(e) => { setCertFile(e.target.files?.[0] || null); setCertError(null); }}
+                  className="hidden" id="cert-file-input" />
+                <label htmlFor="cert-file-input"
+                  className="flex items-center gap-2 border border-dashed border-gray-200 hover:border-emerald-300 rounded-lg p-3 cursor-pointer transition-colors text-sm text-gray-500">
+                  <FileText className="w-4 h-4 text-emerald-500 shrink-0" />
+                  {certFile ? certFile.name : 'Click to select certificate (PDF, JPG, PNG)'}
+                </label>
+              </div>
+              <button onClick={handleCertUpload} disabled={!certFile || certUploading}
+                className="flex items-center justify-center gap-2 w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-lg py-2 text-sm font-medium transition-colors">
+                {certUploading ? <><Loader2 className="w-4 h-4 animate-spin" /> Uploading…</> : <><Upload className="w-4 h-4" /> Upload Certificate</>}
+              </button>
+            </div>
+          )}
+
           <div className="flex gap-3 justify-center">
-            <button onClick={() => { setSuccess(false); setCreatedCreds(null); setForm({ name:'',email:'',phone:'',specialization:'',qualification:'',experience:'',licenseNumber:'',bio:'',consultationModes:[] }); }}
+            <button onClick={() => { setSuccess(false); setCreatedCreds(null); setCreatedDoctorId(null); setForm({ name:'',email:'',phone:'',specialization:'',qualification:'',experience:'',licenseNumber:'',bio:'',consultationModes:[] }); }}
               className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
               Add Another
             </button>

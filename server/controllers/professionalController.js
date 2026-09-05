@@ -176,9 +176,40 @@ const getAppointments = async (req, res, next) => {
       .populate('userId', 'name email phone')
       .populate('hospitalId', 'name city')
       .sort({ createdAt: -1 })
-      .limit(50);
+      .limit(100);
 
     return success(res, { appointments, total: appointments.length }, 'Appointments retrieved');
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ── PUT /api/professional/appointments/:id/status ─────────────────────────────
+const updateAppointmentStatus = async (req, res, next) => {
+  try {
+    const { Appointment } = require('../models');
+    const { status, note } = req.body;
+    if (!status) return fail(res, 'status is required', 400);
+
+    const profile = await Professional.findOne({ userId: req.user.sub });
+    if (!profile) return next(new AppError('Professional profile not found', 404));
+
+    const appointment = await Appointment.findOne({
+      _id: req.params.id,
+      professionalId: profile._id,
+    });
+    if (!appointment) return next(new AppError('Appointment not found', 404));
+
+    appointment.status = status.toUpperCase();
+    appointment.statusHistory.push({
+      status: status.toUpperCase(),
+      changedBy: req.user.sub,
+      changedAt: new Date(),
+      note: note || undefined,
+    });
+    await appointment.save();
+
+    return success(res, { appointment }, 'Appointment status updated');
   } catch (err) {
     next(err);
   }
@@ -242,11 +273,65 @@ const sendRequest = async (req, res, next) => {
   }
 };
 
+// ── POST /api/professional/credentials — upload a credential document ──────────
+const uploadCredential = async (req, res, next) => {
+  try {
+    if (!req.file) return fail(res, 'No file uploaded', 400);
+
+    const { title, institution, year } = req.body;
+    if (!title || !title.trim()) return fail(res, 'Credential title is required', 400);
+
+    const profile = await Professional.findOne({ userId: req.user.sub });
+    if (!profile) return fail(res, 'Create your professional profile first', 400);
+
+    const documentUrl = `/uploads/credentials/${req.file.filename}`;
+
+    profile.credentials.push({
+      title:       title.trim(),
+      institution: institution?.trim() || undefined,
+      year:        year ? Number(year) : undefined,
+      documentUrl,
+    });
+    await profile.save();
+
+    return success(res, { credential: profile.credentials.at(-1) }, 'Credential uploaded', 201);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ── DELETE /api/professional/credentials/:credId ──────────────────────────────
+const deleteCredential = async (req, res, next) => {
+  try {
+    const profile = await Professional.findOne({ userId: req.user.sub });
+    if (!profile) return fail(res, 'Profile not found', 404);
+
+    const cred = profile.credentials.id(req.params.credId);
+    if (!cred) return fail(res, 'Credential not found', 404);
+
+    // Remove file from disk if it exists
+    if (cred.documentUrl) {
+      const path = require('path');
+      const fs   = require('fs');
+      const filePath = path.join(__dirname, '..', cred.documentUrl);
+      try { fs.unlinkSync(filePath); } catch (_) {}
+    }
+
+    profile.credentials.pull({ _id: req.params.credId });
+    await profile.save();
+
+    return success(res, {}, 'Credential deleted');
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getProfile, upsertProfile, getAssociations,
   requestAssociation,
   getNotifications, markNotificationRead, markAllNotificationsRead,
-  getAppointments,
+  getAppointments, updateAppointmentStatus,
   updateAvailability,
   getRequests, sendRequest,
+  uploadCredential, deleteCredential,
 };
